@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blender Showdown — Compare the Best Blenders</title>
+<style>
+  :root{
+    --bg:           #14171c;
+    --bg-panel:     #1c2027;
+    --bg-panel-2:   #20242c;
+    --border:       #313742;
+    --text:         #f6f8fb;
+    --text-dim:     #aab2c0;
+    --teal:         #ff8c9a;
+    --teal-dim:     #5a2733;
+    --citrus:       #ff9248;
+    --citrus-dim:   #4d3322;
+    --berry:        #ff6b9d;
+    --focus:        #ffd166;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size:18px;
+    line-height:1.5;
+    padding-bottom:80px;
+  }
+
+  h1,h2,h3,.display{
+    font-family:'Sora','Inter',sans-serif;
+    font-weight:800;
+    letter-spacing:-0.01em;
+  }
+
+  a{color:var(--teal);}
+
+  /* ---------- Visible focus state everywhere ---------- */
+  button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
+    outline:3px solid var(--focus);
+    outline-offset:3px;
+    border-radius:6px;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    max-width:1100px;
+    margin:0 auto;
+    padding:64px 24px 40px;
+    text-align:center;
+  }
+  .eyebrow{
+    display:inline-block;
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--teal);
+    background:var(--teal-dim);
+    padding:6px 16px;
+    border-radius:999px;
+    margin-bottom:22px;
+  }
+  .hero h1{
+    font-size:clamp(40px, 6vw, 64px);
+    line-height:1.08;
+    margin-bottom:20px;
+  }
+  .hero h1 span{ color:var(--teal); }
+  .hero p{
+    font-size:21px;
+    color:var(--text-dim);
+    max-width:680px;
+    margin:0 auto;
+  }
+
+  /* ---------- Torque strip (signature element) ---------- */
+  .torque-strip{
+    max-width:1100px;
+    margin:48px auto 0;
+    padding:0 24px;
+  }
+  .torque-strip h2{
+    font-size:24px;
+    margin-bottom:18px;
+  }
+  .torque-rows{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .torque-row{
+    display:grid;
+    grid-template-columns:160px 1fr 90px;
+    align-items:center;
+    gap:16px;
+  }
+  .torque-name{
+    font-weight:700;
+    font-size:17px;
+  }
+  .torque-track{
+    background:var(--bg-panel);
+    border:1px solid var(--border);
+    border-radius:999px;
+    height:22px;
+    overflow:hidden;
+  }
+  .torque-fill{
+    height:100%;
+    border-radius:999px;
+    background:linear-gradient(90deg, var(--teal), var(--berry));
+  }
+  .torque-val{
+    font-weight:800;
+    font-size:17px;
+    text-align:right;
+    color:var(--teal);
+  }
+
+  /* ---------- Controls ---------- */
+  .controls{
+    max-width:1100px;
+    margin:56px auto 28px;
+    padding:0 24px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .filter-group{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .filter-btn{
+    font-family:inherit;
+    font-size:16px;
+    font-weight:700;
+    color:var(--text-dim);
+    background:var(--bg-panel);
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:10px 20px;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .filter-btn:hover{ color:var(--text); border-color:var(--teal); }
+  .filter-btn[aria-pressed="true"]{
+    background:var(--teal);
+    color:#0b1110;
+    border-color:var(--teal);
+  }
+
+  .sort-select{
+    font-family:inherit;
+    font-size:16px;
+    font-weight:700;
+    color:var(--text);
+    background:var(--bg-panel);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px 16px;
+    cursor:pointer;
+  }
+
+  /* ---------- Card grid ---------- */
+  .grid{
+    max-width:1100px;
+    margin:0 auto;
+    padding:0 24px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(310px, 1fr));
+    gap:22px;
+  }
+
+  .card{
+    background:var(--bg-panel);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:26px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    transition:transform .15s ease, border-color .15s ease;
+  }
+  .card:hover{
+    border-color:var(--teal);
+    transform:translateY(-3px);
+  }
+  .card.best-pick{
+    border-color:var(--citrus);
+    background:linear-gradient(180deg, var(--bg-panel-2), var(--bg-panel));
+  }
+
+  .badge-row{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .badge{
+    font-size:13px;
+    font-weight:800;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    padding:5px 12px;
+    border-radius:999px;
+  }
+  .badge.tier-budget{ background:#214d3a; color:#7af0b5; }
+  .badge.tier-mid{ background:#214a4d; color:#6fe3f0; }
+  .badge.tier-premium{ background:var(--citrus-dim); color:var(--citrus); }
+  .badge.pick{ background:var(--citrus); color:#2a1404; }
+
+  .card h3{ font-size:24px; }
+  .card .price{
+    font-size:30px;
+    font-weight:800;
+    color:var(--teal);
+  }
+  .card .tagline{
+    color:var(--text-dim);
+    font-size:16px;
+  }
+
+  .spec-list{
+    list-style:none;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-top:6px;
+  }
+  .spec-list li{
+    display:flex;
+    justify-content:space-between;
+    font-size:16px;
+    border-top:1px solid var(--border);
+    padding-top:8px;
+  }
+  .spec-list .label{ color:var(--text-dim); }
+  .spec-list .value{ font-weight:700; }
+
+  .best-for{
+    margin-top:auto;
+    background:var(--bg-panel-2);
+    border-radius:12px;
+    padding:14px 16px;
+    font-size:16px;
+  }
+  .best-for strong{ color:var(--citrus); display:block; margin-bottom:4px; font-size:14px; text-transform:uppercase; letter-spacing:0.05em;}
+
+  .visit-link{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    text-decoration:none;
+    font-weight:800;
+    font-size:16px;
+    color:#0b1110;
+    background:var(--teal);
+    border-radius:10px;
+    padding:13px 18px;
+    transition:background .15s ease, transform .15s ease;
+  }
+  .visit-link:hover{
+    background:#7ff2dd;
+    transform:translateY(-1px);
+  }
+  .visit-link:visited{ color:#0b1110; }
+
+  /* ---------- Full comparison table ---------- */
+  .table-section{
+    max-width:1100px;
+    margin:64px auto 0;
+    padding:0 24px;
+  }
+  .table-section h2{ font-size:30px; margin-bottom:8px; }
+  .table-section p.sub{ color:var(--text-dim); margin-bottom:24px; font-size:17px; }
+
+  .table-wrap{
+    overflow-x:auto;
+    border:1px solid var(--border);
+    border-radius:16px;
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:760px;
+  }
+  thead th{
+    background:var(--bg-panel-2);
+    text-align:left;
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--text-dim);
+    padding:16px 18px;
+    border-bottom:1px solid var(--border);
+    position:sticky;
+    top:0;
+  }
+  tbody td{
+    padding:16px 18px;
+    border-bottom:1px solid var(--border);
+    font-size:16px;
+  }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr:hover{ background:var(--bg-panel-2); }
+  tbody td.name{ font-weight:800; color:var(--text); }
+  tbody td.name a{ color:var(--text); text-decoration:underline; text-decoration-color:var(--teal); text-underline-offset:3px; }
+  tbody td.name a:hover{ color:var(--teal); }
+
+  /* ---------- Footer ---------- */
+  footer{
+    max-width:1100px;
+    margin:64px auto 0;
+    padding:24px;
+    color:var(--text-dim);
+    font-size:14px;
+    text-align:center;
+    border-top:1px solid var(--border);
+  }
+
+  @media (max-width:600px){
+    .torque-row{ grid-template-columns:100px 1fr 70px; }
+    body{ font-size:17px; }
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <span class="eyebrow">Blender Showdown</span>
+  <h1>Find the blender that<br><span>actually earns</span> counter space.</h1>
+  <p>Seven blenders, head to head — motor power, jar capacity, price, and the one job each machine does best. No fluff, just the numbers that matter before you buy.</p>
+</section>
+
+<section class="torque-strip" aria-label="Motor power comparison">
+  <h2>Motor power, side by side</h2>
+  <div class="torque-rows" id="torqueRows"></div>
+</section>
+
+<section class="controls">
+  <div class="filter-group" role="group" aria-label="Filter by price tier">
+    <button class="filter-btn" data-tier="all" aria-pressed="true">All blenders</button>
+    <button class="filter-btn" data-tier="budget" aria-pressed="false">Budget</button>
+    <button class="filter-btn" data-tier="mid" aria-pressed="false">Mid-range</button>
+    <button class="filter-btn" data-tier="premium" aria-pressed="false">Premium</button>
+  </div>
+  <select class="sort-select" id="sortSelect" aria-label="Sort blenders">
+    <option value="default">Sort: Featured</option>
+    <option value="price-asc">Price: Low to high</option>
+    <option value="price-desc">Price: High to low</option>
+    <option value="power-desc">Power: Strongest first</option>
+    <option value="capacity-desc">Jar size: Largest first</option>
+  </select>
+</section>
+
+<section class="grid" id="cardGrid" aria-label="Blender cards"></section>
+
+<section class="table-section">
+  <h2>Full spec comparison</h2>
+  <p class="sub">Every number in one table — scroll sideways on smaller screens.</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Blender</th>
+          <th scope="col">Price</th>
+          <th scope="col">Power</th>
+          <th scope="col">Jar size</th>
+          <th scope="col">Warranty</th>
+          <th scope="col">Noise level</th>
+          <th scope="col">Best for</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+  Prices and specs are approximate manufacturer figures as of mid-2026 and can vary by retailer and bundle. Always confirm current pricing before buying.
+</footer>
+
+<script>
+const blenders = [
+  {
+    name: "Vitamix Ascent X5",
+    tier: "premium",
+    price: 549,
+    priceLabel: "$549",
+    power: 2.2,
+    powerLabel: "2.2 HP",
+    capacityOz: 64,
+    capacityLabel: "64 oz",
+    warranty: "10 years",
+    noise: "Moderate",
+    tagline: "The daily-driver workhorse.",
+    bestFor: "Anyone blending smoothies and hot soups every single day and wants a machine built to outlast the kitchen remodel.",
+    pick: true,
+    url: "https://www.vitamix.com/us/en_us/products/ascent-x5"
+  },
+  {
+    name: "Blendtec Designer 725",
+    tier: "premium",
+    price: 599,
+    priceLabel: "$599",
+    power: 3,
+    powerLabel: "3.0 HP",
+    capacityOz: 90,
+    capacityLabel: "90 oz",
+    warranty: "10 years",
+    noise: "Loud",
+    tagline: "The ice-crushing heavyweight.",
+    bestFor: "Big batches and crushed ice — frozen margaritas for a crowd, no problem.",
+    pick: false,
+    url: "https://www.blendtec.com/products/designer-725"
+  },
+  {
+    name: "KitchenAid K400",
+    tier: "mid",
+    price: 230,
+    priceLabel: "$230",
+    power: 3.5,
+    powerLabel: "3.5 peak HP",
+    capacityOz: 56,
+    capacityLabel: "56 oz",
+    warranty: "5 years",
+    noise: "Moderate",
+    tagline: "The all-rounder for less.",
+    bestFor: "Solid power and a sturdy jar without paying premium-brand prices.",
+    pick: false,
+    url: "https://www.kitchenaid.com/countertop-appliances/blenders/k400-blender"
+  },
+  {
+    name: "Breville Fresh & Furious",
+    tier: "mid",
+    price: 200,
+    priceLabel: "$200",
+    power: 1.6,
+    powerLabel: "1100W",
+    capacityOz: 50,
+    capacityLabel: "50 oz",
+    warranty: "2 years",
+    noise: "Moderate",
+    tagline: "The precision pulse machine.",
+    bestFor: "People who like fine control — chunky salsa one minute, silky soup the next.",
+    pick: false,
+    url: "https://www.breville.com/en-us/product/bbl620"
+  },
+  {
+    name: "Ninja BlendBoss",
+    tier: "budget",
+    price: 160,
+    priceLabel: "$130–$180",
+    power: 1.4,
+    powerLabel: "1400W",
+    capacityOz: 24,
+    capacityLabel: "24 oz cup",
+    warranty: "1 year",
+    noise: "Loud",
+    tagline: "The grab-and-go smoothie cup.",
+    bestFor: "One-person smoothies you blend straight into a to-go cup, fast.",
+    pick: false,
+    url: "https://www.ninjakitchen.com/shop-products/ninja-blendboss-cyberspace-db301cybrn/DB301CYBRN.html"
+  },
+  {
+    name: "Vitamix 5200",
+    tier: "premium",
+    price: 449,
+    priceLabel: "$449",
+    power: 2,
+    powerLabel: "2.0 HP",
+    capacityOz: 64,
+    capacityLabel: "64 oz",
+    warranty: "7 years",
+    noise: "Loud",
+    tagline: "The classic that started it all.",
+    bestFor: "Purists who want Vitamix's no-frills, dial-and-switch original — built like a tank, with decades of proven reliability.",
+    pick: false,
+    url: "https://www.vitamix.com/us/en_us/products/5200-legacy-bundle"
+  },
+  {
+    name: "NutriBullet Pro 1200",
+    tier: "budget",
+    price: 100,
+    priceLabel: "$90–$120",
+    power: 1.2,
+    powerLabel: "1200W",
+    capacityOz: 32,
+    capacityLabel: "32 oz cup",
+    warranty: "1 year",
+    noise: "Loud",
+    tagline: "The cheapest way in.",
+    bestFor: "Tight budgets and small kitchens — one button, no learning curve.",
+    pick: false,
+    url: "https://www.nutribullet.com/shop/blenders/nutribullet-pro-plus/"
+  }
+];
+
+const tierLabel = { budget: "Budget", mid: "Mid-range", premium: "Premium" };
+
+function renderTorque(){
+  const maxPower = Math.max(...blenders.map(b => b.power));
+  const container = document.getElementById('torqueRows');
+  container.innerHTML = blenders
+    .slice()
+    .sort((a,b) => b.power - a.power)
+    .map(b => `
+      <div class="torque-row">
+        <div class="torque-name">${b.name}</div>
+        <div class="torque-track" role="img" aria-label="${b.name} power: ${b.powerLabel}">
+          <div class="torque-fill" style="width:${(b.power/maxPower*100).toFixed(0)}%"></div>
+        </div>
+        <div class="torque-val">${b.powerLabel}</div>
+      </div>
+    `).join('');
+}
+
+function renderCards(list){
+  const grid = document.getElementById('cardGrid');
+  grid.innerHTML = list.map(b => `
+    <article class="card ${b.pick ? 'best-pick' : ''}">
+      <div class="badge-row">
+        <span class="badge tier-${b.tier}">${tierLabel[b.tier]}</span>
+        ${b.pick ? '<span class="badge pick">Editor pick</span>' : ''}
+      </div>
+      <h3>${b.name}</h3>
+      <div class="price">${b.priceLabel}</div>
+      <div class="tagline">${b.tagline}</div>
+      <ul class="spec-list">
+        <li><span class="label">Power</span><span class="value">${b.powerLabel}</span></li>
+        <li><span class="label">Jar size</span><span class="value">${b.capacityLabel}</span></li>
+        <li><span class="label">Warranty</span><span class="value">${b.warranty}</span></li>
+        <li><span class="label">Noise</span><span class="value">${b.noise}</span></li>
+      </ul>
+      <div class="best-for">
+        <strong>Best for</strong>
+        ${b.bestFor}
+      </div>
+      <a class="visit-link" href="${b.url}" target="_blank" rel="noopener noreferrer">
+        Visit official site <span aria-hidden="true">↗</span>
+      </a>
+    </article>
+  `).join('');
+}
+
+function renderTable(list){
+  const body = document.getElementById('tableBody');
+  body.innerHTML = list.map(b => `
+    <tr>
+      <td class="name"><a href="${b.url}" target="_blank" rel="noopener noreferrer">${b.name}</a></td>
+      <td>${b.priceLabel}</td>
+      <td>${b.powerLabel}</td>
+      <td>${b.capacityLabel}</td>
+      <td>${b.warranty}</td>
+      <td>${b.noise}</td>
+      <td>${b.tagline}</td>
+    </tr>
+  `).join('');
+}
+
+let currentTier = 'all';
+let currentSort = 'default';
+
+function getFiltered(){
+  let list = currentTier === 'all' ? blenders.slice() : blenders.filter(b => b.tier === currentTier);
+  switch(currentSort){
+    case 'price-asc': list.sort((a,b) => a.price - b.price); break;
+    case 'price-desc': list.sort((a,b) => b.price - a.price); break;
+    case 'power-desc': list.sort((a,b) => b.power - a.power); break;
+    case 'capacity-desc': list.sort((a,b) => b.capacityOz - a.capacityOz); break;
+    default: list.sort((a,b) => (b.pick === true) - (a.pick === true));
+  }
+  return list;
+}
+
+function refresh(){
+  const list = getFiltered();
+  renderCards(list);
+  renderTable(list);
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.setAttribute('aria-pressed','false'));
+    btn.setAttribute('aria-pressed','true');
+    currentTier = btn.dataset.tier;
+    refresh();
+  });
+});
+
+document.getElementById('sortSelect').addEventListener('change', (e) => {
+  currentSort = e.target.value;
+  refresh();
+});
+
+renderTorque();
+refresh();
+</script>
+
+</body>
+</html>
